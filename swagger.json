@@ -1,0 +1,286 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Library API",
+    "version": "1.0",
+    "description": "A simple CRUD API for managing books, members, and borrowing/returning books."
+  },
+  "schemes": ["http"],
+  "paths": {
+    "/user/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["Auth"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "User registration details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": { "type": "string" },
+                "password": { "type": "string" }
+              },
+              "required": ["username", "password"]
+            }
+          }
+        ],
+        "responses": {
+          "201": { "description": "User registered successfully" },
+          "400": { "description": "Invalid input or user already exists" }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "summary": "Login user and get JWT token",
+        "tags": ["Auth"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "User credentials for login",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": { "type": "string" },
+                "password": { "type": "string" }
+              },
+              "required": ["username", "password"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful login with JWT token",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access_token": { "type": "string" }
+              }
+            }
+          },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/books": {
+      "get": {
+        "summary": "Get all books",
+        "tags": ["Books"],
+        "responses": {
+          "200": {
+            "description": "A list of books",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Book"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new book",
+        "tags": ["Books"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Book object to be added",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Book"
+            }
+          }
+        ],
+        "responses": {
+          "201": { "description": "Book created successfully" }
+        }
+      }
+    },
+    "/books/{id}": {
+      "get": {
+        "summary": "Get book by ID",
+        "tags": ["Books"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book details",
+            "schema": { "$ref": "#/definitions/Book" }
+          },
+          "404": { "description": "Book not found" }
+        }
+      },
+      "put": {
+        "summary": "Edit book by ID",
+        "tags": ["Books"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Updated book object",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Book" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Book updated successfully" },
+          "404": { "description": "Book not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete book by ID",
+        "tags": ["Books"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "204": { "description": "Book deleted successfully" },
+          "404": { "description": "Book not found" }
+        }
+      }
+    },
+    "/members": {
+      "get": {
+        "summary": "Get all members",
+        "tags": ["Members"],
+        "responses": {
+          "200": {
+            "description": "A list of members",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Member" }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new member",
+        "tags": ["Members"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Member object to be added",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Member" }
+          }
+        ],
+        "responses": {
+          "201": { "description": "Member added successfully" }
+        }
+      }
+    },
+    "/members/{id}": {
+      "get": {
+        "summary": "Get member by ID",
+        "tags": ["Members"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Member details",
+            "schema": { "$ref": "#/definitions/Member" }
+          },
+          "404": { "description": "Member not found" }
+        }
+      }
+    },
+    "/borrow": {
+      "post": {
+        "summary": "Borrow a book",
+        "tags": ["Borrow"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Borrow request",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "member_id": { "type": "integer" },
+                "book_id": { "type": "integer" },
+                "borrow_date": { "type": "string", "format": "date" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Book borrowed successfully" },
+          "404": { "description": "Book or member not found" },
+          "400": { "description": "Book out of stock" }
+        }
+      }
+    },
+    "/return/{id}": {
+      "post": {
+        "summary": "Return a borrowed book",
+        "tags": ["Borrow"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "borrow_id",
+            "description": "Return request",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": { "description": "Book returned successfully" },
+          "404": { "description": "Borrow record not found" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Book": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "title": { "type": "string" },
+        "author": { "type": "string" },
+        "published_year": { "type": "integer" },
+        "stock": { "type": "integer" }
+      }
+    },
+    "Member": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "phone": { "type": "string" }
+      }
+    }
+  }
+}
+
